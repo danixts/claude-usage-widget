@@ -30,6 +30,7 @@ from ._popup import (
 
 
 WANTS_TICKER = True
+SUPPORTS_OPACITY = True
 
 
 THEME = {
@@ -85,7 +86,9 @@ FONTS = {
 
 # ---- OSD -----------------------------------------------------------
 
-def paint_osd(p: QPainter, rect: QRectF, data, scale: float = 1.0) -> None:
+def paint_osd(
+    p: QPainter, rect: QRectF, data, scale: float = 1.0, opacity: float = 1.0,
+) -> None:
     """Draws the OSD bars view. `data` is the same UsageStats shape the
     existing overlay.py consumes."""
     s = scale
@@ -95,7 +98,7 @@ def paint_osd(p: QPainter, rect: QRectF, data, scale: float = 1.0) -> None:
 
     # panel
     p.setPen(Qt.NoPen)
-    p.setBrush(hex_to_qcolor(t["bg"], 0.92))
+    p.setBrush(hex_to_qcolor(t["bg"], max(0.0, min(1.0, opacity))))
     p.drawRoundedRect(rect, m["osd_radius"] * s, m["osd_radius"] * s)
 
     x = rect.x() + pad

@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from . import terminal
 
 WANTS_TICKER = terminal.WANTS_TICKER
+SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
 METRICS = terminal.METRICS
 FONTS = terminal.FONTS
 

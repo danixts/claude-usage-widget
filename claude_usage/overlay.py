@@ -753,7 +753,11 @@ class UsageOverlay(QWidget):
                 # can never disagree and let a scoped/Codex row spill outside
                 # the skin's panel.
                 skin_h = int(self._skin_base_height() * s)
-                self._skin.paint_osd(p, QRectF(0, 0, w, skin_h), data, self._scale)
+                rect = QRectF(0, 0, w, skin_h)
+                if getattr(self._skin, "SUPPORTS_OPACITY", False):
+                    self._skin.paint_osd(p, rect, data, self._scale, self._opacity)
+                else:
+                    self._skin.paint_osd(p, rect, data, self._scale)
                 # Draw news inside the skin's frame: above the skin's own ticker.
                 if getattr(self._skin, "WANTS_TICKER", False):
                     pad_x = 14 * s
