@@ -163,7 +163,7 @@ def _paint_compact_uplink(
              f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m · {int(data.codex_weekly_pct * 100)}%"),
         ])
 
-    row_height = 24 * s
+    row_height = 28 * s
     for index, (label, pct, value) in enumerate(rows):
         top = header_y + 6 * s + index * row_height
         p.setPen(Qt.NoPen)
@@ -181,6 +181,20 @@ def _paint_compact_uplink(
                   hex_to_qcolor(theme["text_primary"]), value_f)
         _draw_uplink_bar(p, x, top + QFontMetrics(label_f).height() + 2 * s,
                          width, pct, theme, s)
+
+    if getattr(data, "show_ticker", True):
+        ticker_y = rect.bottom() - 10 * s
+        p.setPen(QPen(hex_to_qcolor(theme["border"], 0.9), max(0.5, 0.7 * s)))
+        p.drawLine(QPointF(x, ticker_y - 14 * s), QPointF(x + width, ticker_y - 14 * s))
+        ticker_f = mono_font(8 * s, family=family)
+        ticker_colors = (
+            theme["text_dim"], theme["text_link"], theme["warn"], theme["crit"],
+        )
+        draw_ticker_marquee(
+            p, x, ticker_y, width,
+            data.ticker_items, data.ticker_offset,
+            ticker_colors, ticker_f, sep_gap_px=10 * s,
+        )
 
 
 def paint_osd(
