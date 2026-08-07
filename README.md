@@ -266,7 +266,7 @@ cp config.json.example config.json
 | `daily_token_limit` | `5000000` | Daily token limit for local tracking |
 | `weekly_token_limit` | `25000000` | Weekly token limit for local tracking |
 | `claude_dir` | `~/.claude` | Path to the Claude Code data directory |
-| `theme` | `default` | Color theme for the OSD and popup. One of `default`, `catppuccin-mocha`, `dracula`, `nord`, `gruvbox-dark`, `terminal`, `dashboard`, `hud`, `receipt`, `strip`, `brutalist` |
+| `theme` | `default` | Color theme for the OSD and popup. One of `default`, `catppuccin-mocha`, `dracula`, `nord`, `gruvbox-dark`, `night-owl`, `terminal`, `dashboard`, `hud`, `receipt`, `strip`, `brutalist` |
 | `show_ticker` | `true` | Whether the scrolling per-turn cost ticker is painted at the bottom of the OSD. Toggle at runtime via right-click → "Show cost ticker". |
 | `show_news` | `false` | Whether the live Anthropic/Claude news headline strip is shown on the OSD. Off by default because it makes outbound calls to a 3rd-party feed. Toggle at runtime via right-click → "Show news ticker". |
 | `osd_position` | `top-right` | Where the OSD anchors: `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `custom`. Set from right-click → "OSD Position", or automatically to `custom` when you drag the overlay. |

@@ -17,6 +17,7 @@ EXPECTED_THEMES = {
     "dracula",
     "nord",
     "gruvbox-dark",
+    "night-owl",
     "terminal",
     "dashboard",
     "hud",
@@ -43,20 +44,22 @@ def test_all_themes_share_identical_keys() -> None:
 
 def test_theme_keys_contains_expected_role_names() -> None:
     """THEME_KEYS matches the documented role names."""
-    assert THEME_KEYS == frozenset({
-        "bg",
-        "bar_blue",
-        "bar_track",
-        "text_primary",
-        "text_secondary",
-        "text_dim",
-        "text_link",
-        "separator",
-        "warn",
-        "crit",
-        "error",
-        "live_indicator",
-    })
+    assert THEME_KEYS == frozenset(
+        {
+            "bg",
+            "bar_blue",
+            "bar_track",
+            "text_primary",
+            "text_secondary",
+            "text_dim",
+            "text_link",
+            "separator",
+            "warn",
+            "crit",
+            "error",
+            "live_indicator",
+        }
+    )
 
 
 @pytest.mark.parametrize("name", sorted(EXPECTED_THEMES))
