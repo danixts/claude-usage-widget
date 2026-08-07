@@ -27,7 +27,7 @@ THEME = {
     "glass": True,
     "futuristic": True,
     "compact_hud": True,
-    "compact_title": "[ UPLINK STATUS ]",
+    "compact_title": "[ CLAUDE // UPLINK ]",
     "font_family": "Noto Sans Mono",
     "glass_top": "#0b2d4a",
     "glass_bottom": "#010f1e",
