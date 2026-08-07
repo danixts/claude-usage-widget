@@ -13,6 +13,7 @@ Interactions:
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime
 from typing import Any
 
@@ -239,9 +240,9 @@ class UsageOverlay(QWidget):
         self._news_offset: float = 0.0   # separate scroll offset for news strip
         self._latest_headline: str = ""  # single headline shown in news strip
         self._latest_news_url: str = ""  # URL opened on click
-        # User toggle — default on, overridable via config; runtime flip
+        # User toggle — default off, overridable via config; runtime flip
         # lives in the right-click menu.
-        self._ticker_enabled: bool = bool(cfg.get("show_ticker", True))
+        self._ticker_enabled: bool = bool(cfg.get("show_ticker", False))
         # News strip is OPT-IN — defaults to False because it makes an
         # outbound network call to a 3rd-party feed (hnrss.org / reddit),
         # something a fresh install shouldn't do silently. Users opt in via
@@ -355,6 +356,7 @@ class UsageOverlay(QWidget):
         # module-level WANTS_TICKER flag.
         skin_wants_ticker = (
             self._skin is not None
+            and self._ticker_enabled
             and self._ticker_items
             and getattr(self._skin, "WANTS_TICKER", False)
         )
@@ -746,6 +748,7 @@ class UsageOverlay(QWidget):
             data = _skin_data_from_stats(
                 self._last_stats, ticker_offset=self._ticker_offset,
             )
+            data = replace(data, show_ticker=self._ticker_enabled)
             try:
                 s = self._scale
                 # Paint into the SAME rect height the window was sized to in

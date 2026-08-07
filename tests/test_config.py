@@ -12,7 +12,12 @@ import tempfile
 import unittest
 from typing import Any
 
-from claude_usage.config import DEFAULT_CONFIG, load_config, save_config, user_config_path
+from claude_usage.config import (
+    DEFAULT_CONFIG,
+    load_config,
+    save_config,
+    user_config_path,
+)
 
 
 class TestDefaultConfig(unittest.TestCase):
@@ -38,6 +43,9 @@ class TestDefaultConfig(unittest.TestCase):
         self.assertIn("osd_scale", DEFAULT_CONFIG)
         self.assertEqual(DEFAULT_CONFIG["osd_opacity"], 0.75)
         self.assertEqual(DEFAULT_CONFIG["osd_scale"], 1.0)
+
+    def test_cost_ticker_is_disabled_by_default(self) -> None:
+        self.assertIs(DEFAULT_CONFIG["show_ticker"], False)
 
     def test_claude_dir_is_absolute(self) -> None:
         """The default claude_dir value is an absolute path (tilde has been expanded)."""

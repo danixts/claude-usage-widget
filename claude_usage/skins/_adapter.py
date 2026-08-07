@@ -54,6 +54,9 @@ class SkinData:
     is_live: bool = False
     subagent_count: int = 0
     ticker_items: list[SkinTickerItem] = field(default_factory=list)
+    # The overlay controls this independently from the event data so users
+    # can hide the scrolling bottom strip without losing collected history.
+    show_ticker: bool = True
     # Pixels scrolled so far on the ticker marquee. Skins that animate
     # their ticker (terminal, strip, ...) modulo this against the total
     # strip width; static skins ignore it.

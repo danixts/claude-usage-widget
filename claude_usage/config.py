@@ -90,8 +90,9 @@ DEFAULT_CONFIG: Config = {
     # Appearance: theme palette name (see themes.py — 11 in all: 5 classics + 6 skins).
     "theme": "default",
     # Whether the OSD paints a scrolling per-turn cost ticker along the
-    # bottom edge. Toggle at runtime via the right-click menu.
-    "show_ticker": True,
+    # bottom edge. Disabled by default; toggle at runtime via the right-click
+    # menu when the extra activity is useful.
+    "show_ticker": False,
     # OSD view mode — "bars" (default) or "gauge". See overlay.VIEW_MODES.
     "osd_view_mode": "bars",
     # Where the OSD anchors on screen. One of the four corners, or "custom"

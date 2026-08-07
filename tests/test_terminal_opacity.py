@@ -51,6 +51,15 @@ def _background_colors(skin, opacity: float):
     return image.pixelColor(220, 20), image.pixelColor(220, 150)
 
 
+def _render_bytes(skin, data: SimpleNamespace) -> bytes:
+    image = QImage(440, 172, QImage.Format_ARGB32_Premultiplied)
+    image.fill(Qt.transparent)
+    painter = QPainter(image)
+    skin.paint_osd(painter, QRectF(0, 0, 440, 172), data, opacity=0.25)
+    painter.end()
+    return bytes(image.constBits())
+
+
 def test_terminal_skin_applies_osd_opacity():
     assert 55 <= _background_alpha(terminal, 0.25) <= 75
 
@@ -63,3 +72,11 @@ def test_terminal_owl_uses_a_translucent_glass_gradient():
     top, bottom = _background_colors(terminal_owl, 0.25)
     assert top.alpha() == bottom.alpha()
     assert top.rgb() != bottom.rgb()
+
+
+def test_terminal_skin_hides_bottom_ticker_when_disabled():
+    shown = _render_bytes(terminal, _data())
+    hidden_data = _data()
+    hidden_data.show_ticker = False
+    hidden = _render_bytes(terminal, hidden_data)
+    assert shown != hidden

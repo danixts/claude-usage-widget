@@ -221,24 +221,23 @@ def paint_osd(
                        hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
                        body_f)
 
-    # ticker strip — dashed separator + colour-quartile cost tags
-    y_tick = y_bar + line_h + 6 * s
-    # dashed top rule
-    p.setPen(hex_to_qcolor(t["border"]))
-    dash_w = 3 * s
-    gx = x
-    while gx < x + w:
-        p.drawLine(QPointF(gx, y_tick), QPointF(gx + dash_w, y_tick))
-        gx += dash_w * 2
+    if getattr(data, "show_ticker", True):
+        # Ticker strip — dashed separator + colour-quartile cost tags.
+        y_tick = y_bar + line_h + 6 * s
+        p.setPen(hex_to_qcolor(t["border"]))
+        dash_w = 3 * s
+        gx = x
+        while gx < x + w:
+            p.drawLine(QPointF(gx, y_tick), QPointF(gx + dash_w, y_tick))
+            gx += dash_w * 2
 
-    # Scrolling marquee via the shared helper.
-    ticker_colors = (t["text_dim"], t["text_link"], t["warn"], t["crit"])
-    y_tick_base = y_tick + 4 * s + QFontMetrics(ticker_f).ascent()
-    draw_ticker_marquee(
-        p, x, y_tick_base, w,
-        data.ticker_items, data.ticker_offset,
-        ticker_colors, ticker_f, sep_gap_px=10 * s,
-    )
+        ticker_colors = (t["text_dim"], t["text_link"], t["warn"], t["crit"])
+        y_tick_base = y_tick + 4 * s + QFontMetrics(ticker_f).ascent()
+        draw_ticker_marquee(
+            p, x, y_tick_base, w,
+            data.ticker_items, data.ticker_offset,
+            ticker_colors, ticker_f, sep_gap_px=10 * s,
+        )
 
 
 # ---- POPUP ---------------------------------------------------------
