@@ -67,6 +67,7 @@ class TestViewMode(unittest.TestCase):
 
         metrics = terminal_owl.METRICS
         ov = UsageOverlay({"theme": "terminal-owl", "show_ticker": False})
+        self.assertEqual(ov.width(), metrics["osd_width"])
         self.assertEqual(
             ov.height(),
             metrics["osd_height"] - metrics["ticker_height"],

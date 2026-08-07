@@ -97,11 +97,11 @@ def _draw_uplink_bar(
     scale: float,
 ) -> None:
     """Render the Terminal Owl HUD bar with a soft neon fill and dividers."""
-    height = max(4.0, 5.0 * scale)
+    height = max(6.0, 8.0 * scale)
     rect = QRectF(x, y, width, height)
     radius = height / 2
     p.setPen(Qt.NoPen)
-    p.setBrush(hex_to_qcolor(theme["bar_track"], 0.9))
+    p.setBrush(hex_to_qcolor(theme["bar_track"], 0.98))
     p.drawRoundedRect(rect, radius, radius)
 
     fill_width = width * max(0.0, min(1.0, pct))
@@ -113,7 +113,10 @@ def _draw_uplink_bar(
         p.setBrush(gradient)
         p.drawRoundedRect(fill, radius, radius)
 
-    p.setPen(QPen(hex_to_qcolor(theme["border"], 0.75), max(0.5, scale * 0.6)))
+    p.setPen(QPen(hex_to_qcolor(theme["accent2"], 0.82), max(0.7, scale * 0.8)))
+    p.setBrush(Qt.NoBrush)
+    p.drawRoundedRect(rect, radius, radius)
+    p.setPen(QPen(hex_to_qcolor(theme["border"], 0.9), max(0.5, scale * 0.6)))
     for segment in range(1, 6):
         divider_x = x + width * segment / 6
         p.drawLine(QPointF(divider_x, y + scale), QPointF(divider_x, y + height - scale))

@@ -8,7 +8,10 @@ from . import terminal
 
 WANTS_TICKER = terminal.WANTS_TICKER
 SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
-METRICS = terminal.METRICS
+METRICS = {
+    **terminal.METRICS,
+    "osd_width": 400,
+}
 FONTS = terminal.FONTS
 
 THEME = {
@@ -24,7 +27,7 @@ THEME = {
     "glass_highlight": "#7fdbca",
     "border": "#1d3b53",
     "bar_blue": "#82aaff",
-    "bar_track": "#02233d",
+    "bar_track": "#0a3451",
     "text_primary": "#d6deeb",
     "text_secondary": "#a9b7c6",
     "text_dim": "#5f7e97",
