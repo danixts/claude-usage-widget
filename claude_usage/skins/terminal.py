@@ -140,8 +140,6 @@ def _paint_compact_uplink(
     draw_text(p, x, y + QFontMetrics(title_f).ascent(), header,
               hex_to_qcolor(theme["accent"]), title_f, letter_spacing_px=1.2 * s)
     header_y = y + QFontMetrics(title_f).height() + 8 * s
-    p.setPen(QPen(hex_to_qcolor(theme["border"], 0.9), max(0.5, 0.7 * s)))
-    p.drawLine(QPointF(x, header_y), QPointF(x + width, header_y))
 
     rows = [
         ("SESSION", data.session_pct, f"{data.session_reset_min}m · {int(data.session_pct * 100)}%"),
@@ -163,13 +161,6 @@ def _paint_compact_uplink(
     row_height = 32 * s
     for index, (label, pct, value) in enumerate(rows):
         top = header_y + 6 * s + index * row_height
-        p.setPen(Qt.NoPen)
-        p.setBrush(hex_to_qcolor(theme["bg"], 0.58))
-        p.drawRoundedRect(
-            QRectF(x - 4 * s, top - 2 * s, width + 8 * s, 22 * s),
-            4 * s,
-            4 * s,
-        )
         baseline = top + QFontMetrics(label_f).ascent()
         draw_text(p, x, baseline, label, hex_to_qcolor(theme["text_secondary"]), label_f,
                   letter_spacing_px=0.8 * s)
