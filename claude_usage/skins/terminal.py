@@ -137,9 +137,6 @@ def _paint_compact_uplink(
     value_f = mono_font(9.5 * s, bold=True, family=family)
 
     header = theme.get("compact_title", "UPLINK STATUS")
-    p.setPen(Qt.NoPen)
-    p.setBrush(hex_to_qcolor(theme["bg"], 0.62))
-    p.drawRoundedRect(QRectF(x - 4 * s, y - 3 * s, width + 8 * s, 20 * s), 4 * s, 4 * s)
     draw_text(p, x, y + QFontMetrics(title_f).ascent(), header,
               hex_to_qcolor(theme["accent"]), title_f, letter_spacing_px=1.2 * s)
     header_y = y + QFontMetrics(title_f).height() + 4 * s
@@ -218,9 +215,6 @@ def paint_gauge(
     family = t.get("font_family", FONTS["family"])
     pad = 12 * s
     title_f = mono_font(9 * s, bold=True, family=family)
-    p.setPen(Qt.NoPen)
-    p.setBrush(hex_to_qcolor(t["bg"], 0.62))
-    p.drawRoundedRect(QRectF(pad - 4 * s, pad - 3 * s, rect.width() - 2 * pad + 8 * s, 18 * s), 4 * s, 4 * s)
     draw_text(p, pad, pad + QFontMetrics(title_f).ascent(),
               "[ CLAUDE // GAUGE ]", hex_to_qcolor(t["accent"]), title_f,
               letter_spacing_px=1.0 * s)
