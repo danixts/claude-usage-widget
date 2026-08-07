@@ -11,9 +11,9 @@ SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
 METRICS = {
     **terminal.METRICS,
     "osd_width": 360,
-    "osd_height": 132,
-    "osd_height_scoped": 160,
-    "codex_rows_height": 56,
+    "osd_height": 144,
+    "osd_height_scoped": 176,
+    "codex_rows_height": 64,
     "ticker_height": 28,
 }
 FONTS = terminal.FONTS

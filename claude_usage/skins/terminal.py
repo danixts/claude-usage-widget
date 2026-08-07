@@ -163,7 +163,7 @@ def _paint_compact_uplink(
              f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m · {int(data.codex_weekly_pct * 100)}%"),
         ])
 
-    row_height = 28 * s
+    row_height = 32 * s
     for index, (label, pct, value) in enumerate(rows):
         top = header_y + 6 * s + index * row_height
         p.setPen(Qt.NoPen)
