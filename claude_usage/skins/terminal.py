@@ -87,6 +87,38 @@ FONTS = {
 
 # ---- OSD -----------------------------------------------------------
 
+def _draw_uplink_bar(
+    p: QPainter,
+    x: float,
+    y: float,
+    width: float,
+    pct: float,
+    theme: dict,
+    scale: float,
+) -> None:
+    """Render the Terminal Owl HUD bar with a soft neon fill and dividers."""
+    height = max(4.0, 5.0 * scale)
+    rect = QRectF(x, y, width, height)
+    radius = height / 2
+    p.setPen(Qt.NoPen)
+    p.setBrush(hex_to_qcolor(theme["bar_track"], 0.9))
+    p.drawRoundedRect(rect, radius, radius)
+
+    fill_width = width * max(0.0, min(1.0, pct))
+    if fill_width > 0:
+        fill = QRectF(x, y, max(height, fill_width), height)
+        gradient = QLinearGradient(fill.topLeft(), fill.topRight())
+        gradient.setColorAt(0.0, hex_to_qcolor(theme["accent2"]))
+        gradient.setColorAt(1.0, hex_to_qcolor(theme["accent"]))
+        p.setBrush(gradient)
+        p.drawRoundedRect(fill, radius, radius)
+
+    p.setPen(QPen(hex_to_qcolor(theme["border"], 0.75), max(0.5, scale * 0.6)))
+    for segment in range(1, 6):
+        divider_x = x + width * segment / 6
+        p.drawLine(QPointF(divider_x, y + scale), QPointF(divider_x, y + height - scale))
+
+
 def paint_osd(
     p: QPainter, rect: QRectF, data, scale: float = 1.0, opacity: float = 1.0,
 ) -> None:
@@ -154,6 +186,10 @@ def paint_osd(
         lw = QFontMetrics(body_f).horizontalAdvance(live_text)
         draw_text(p, x + w - lw, baseline, live_text, hex_to_qcolor(t["accent"]), body_f)
 
+    if t.get("futuristic", False):
+        p.setPen(QPen(hex_to_qcolor(t["border"], 0.8), max(0.5, s * 0.7)))
+        p.drawLine(QPointF(x, y + line_h + 3 * s), QPointF(x + w, y + line_h + 3 * s))
+
     # session row
     y_row = y + line_h + m["osd_row_gap"] * s
     draw_text(p, x, y_row + fm.ascent(), t.get("session_label", "session"),
@@ -163,10 +199,13 @@ def paint_osd(
     draw_text(p, x + w - rw, y_row + fm.ascent(), right,
               hex_to_qcolor(t["text_secondary"]), body_f)
     y_bar = y_row + line_h + 2 * s
-    draw_ascii_bar(p, x, y_bar + fm.ascent(), data.session_pct,
-                   m["osd_bar_cols"],
-                   hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
-                   body_f)
+    if t.get("futuristic", False):
+        _draw_uplink_bar(p, x, y_bar, fm.horizontalAdvance("█") * m["osd_bar_cols"], data.session_pct, t, s)
+    else:
+        draw_ascii_bar(p, x, y_bar + fm.ascent(), data.session_pct,
+                       m["osd_bar_cols"],
+                       hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
+                       body_f)
 
     # weekly row
     y_row = y_bar + line_h + m["osd_row_gap"] * s
@@ -177,10 +216,13 @@ def paint_osd(
     draw_text(p, x + w - rw, y_row + fm.ascent(), right,
               hex_to_qcolor(t["text_secondary"]), body_f)
     y_bar = y_row + line_h + 2 * s
-    draw_ascii_bar(p, x, y_bar + fm.ascent(), data.weekly_pct,
-                   m["osd_bar_cols"],
-                   hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
-                   body_f)
+    if t.get("futuristic", False):
+        _draw_uplink_bar(p, x, y_bar, fm.horizontalAdvance("█") * m["osd_bar_cols"], data.weekly_pct, t, s)
+    else:
+        draw_ascii_bar(p, x, y_bar + fm.ascent(), data.weekly_pct,
+                       m["osd_bar_cols"],
+                       hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
+                       body_f)
 
     # scoped weekly row — optional model-scoped cap (e.g. "fable"). Only
     # drawn when the API reports it; mirrors the weekly row exactly and
@@ -194,10 +236,13 @@ def paint_osd(
         draw_text(p, x + w - rw, y_row + fm.ascent(), right,
                   hex_to_qcolor(t["text_secondary"]), body_f)
         y_bar = y_row + line_h + 2 * s
-        draw_ascii_bar(p, x, y_bar + fm.ascent(), data.scoped_pct,
-                       m["osd_bar_cols"],
-                       hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
-                       body_f)
+        if t.get("futuristic", False):
+            _draw_uplink_bar(p, x, y_bar, fm.horizontalAdvance("█") * m["osd_bar_cols"], data.scoped_pct, t, s)
+        else:
+            draw_ascii_bar(p, x, y_bar + fm.ascent(), data.scoped_pct,
+                           m["osd_bar_cols"],
+                           hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
+                           body_f)
 
     # codex rows — optional second-provider (OpenAI Codex) 5h + 7d windows.
     # Mirrors the session/weekly rows exactly and pushes the ticker below
@@ -212,10 +257,13 @@ def paint_osd(
         draw_text(p, x + w - rw, y_row + fm.ascent(), right,
                   hex_to_qcolor(t["text_secondary"]), body_f)
         y_bar = y_row + line_h + 2 * s
-        draw_ascii_bar(p, x, y_bar + fm.ascent(), data.codex_session_pct,
-                       m["osd_bar_cols"],
-                       hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
-                       body_f)
+        if t.get("futuristic", False):
+            _draw_uplink_bar(p, x, y_bar, fm.horizontalAdvance("█") * m["osd_bar_cols"], data.codex_session_pct, t, s)
+        else:
+            draw_ascii_bar(p, x, y_bar + fm.ascent(), data.codex_session_pct,
+                           m["osd_bar_cols"],
+                           hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
+                           body_f)
         # codex 7d — mirrors the weekly row
         y_row = y_bar + line_h + m["osd_row_gap"] * s
         draw_text(p, x, y_row + fm.ascent(), "codex 7d",
@@ -225,10 +273,13 @@ def paint_osd(
         draw_text(p, x + w - rw, y_row + fm.ascent(), right,
                   hex_to_qcolor(t["text_secondary"]), body_f)
         y_bar = y_row + line_h + 2 * s
-        draw_ascii_bar(p, x, y_bar + fm.ascent(), data.codex_weekly_pct,
-                       m["osd_bar_cols"],
-                       hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
-                       body_f)
+        if t.get("futuristic", False):
+            _draw_uplink_bar(p, x, y_bar, fm.horizontalAdvance("█") * m["osd_bar_cols"], data.codex_weekly_pct, t, s)
+        else:
+            draw_ascii_bar(p, x, y_bar + fm.ascent(), data.codex_weekly_pct,
+                           m["osd_bar_cols"],
+                           hex_to_qcolor(t["accent"]), hex_to_qcolor(t["very_dim"]),
+                           body_f)
 
     if getattr(data, "show_ticker", True):
         # Ticker strip — dashed separator + colour-quartile cost tags.
