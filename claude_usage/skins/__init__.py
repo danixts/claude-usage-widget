@@ -14,20 +14,30 @@ nuances to preserve (letter-spacing, ASCII glyph widths, arc angles).
 
 from __future__ import annotations
 
-from . import brutalist, dashboard, hud, receipt, strip, terminal
+from . import brutalist, dashboard, hud, receipt, strip, terminal, terminal_owl
 from ._adapter import SkinData, SkinTickerItem, from_usage_stats
 
 # style-name → module map used by the overlay to dispatch paint.
 SKIN_MODULES = {
     brutalist.THEME["style"]: brutalist,
     dashboard.THEME["style"]: dashboard,
-    hud.THEME["style"]:       hud,
-    receipt.THEME["style"]:   receipt,
-    strip.THEME["style"]:     strip,
-    terminal.THEME["style"]:  terminal,
+    hud.THEME["style"]: hud,
+    receipt.THEME["style"]: receipt,
+    strip.THEME["style"]: strip,
+    terminal.THEME["style"]: terminal,
+    terminal_owl.THEME["style"]: terminal_owl,
 }
 
 __all__ = [
-    "brutalist", "dashboard", "hud", "receipt", "strip", "terminal",
-    "SKIN_MODULES", "SkinData", "SkinTickerItem", "from_usage_stats",
+    "brutalist",
+    "dashboard",
+    "hud",
+    "receipt",
+    "strip",
+    "terminal",
+    "terminal_owl",
+    "SKIN_MODULES",
+    "SkinData",
+    "SkinTickerItem",
+    "from_usage_stats",
 ]

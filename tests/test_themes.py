@@ -19,6 +19,7 @@ EXPECTED_THEMES = {
     "gruvbox-dark",
     "night-owl",
     "terminal",
+    "terminal-owl",
     "dashboard",
     "hud",
     "receipt",
