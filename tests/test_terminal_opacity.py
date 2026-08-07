@@ -42,9 +42,24 @@ def _background_alpha(skin, opacity: float) -> int:
     return image.pixelColor(5, 5).alpha()
 
 
+def _background_colors(skin, opacity: float):
+    image = QImage(440, 172, QImage.Format_ARGB32_Premultiplied)
+    image.fill(Qt.transparent)
+    painter = QPainter(image)
+    skin.paint_osd(painter, QRectF(0, 0, 440, 172), _data(), opacity=opacity)
+    painter.end()
+    return image.pixelColor(220, 20), image.pixelColor(220, 150)
+
+
 def test_terminal_skin_applies_osd_opacity():
     assert 55 <= _background_alpha(terminal, 0.25) <= 75
 
 
 def test_terminal_owl_skin_applies_osd_opacity():
     assert 55 <= _background_alpha(terminal_owl, 0.25) <= 75
+
+
+def test_terminal_owl_uses_a_translucent_glass_gradient():
+    top, bottom = _background_colors(terminal_owl, 0.25)
+    assert top.alpha() == bottom.alpha()
+    assert top.rgb() != bottom.rgb()

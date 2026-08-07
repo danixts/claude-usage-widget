@@ -16,7 +16,7 @@ Nuances that are easy to miss:
 from __future__ import annotations
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter
+from PySide6.QtGui import QFontMetrics, QLinearGradient, QPainter, QPen
 
 from ._paint import (
     draw_ascii_bar, draw_block_bar, draw_heatmap_52w, draw_sparkline_bars,
@@ -97,9 +97,30 @@ def paint_osd(
     pad = m["osd_padding"] * s
 
     # panel
+    panel_alpha = max(0.0, min(1.0, opacity))
+    radius = m["osd_radius"] * s
     p.setPen(Qt.NoPen)
-    p.setBrush(hex_to_qcolor(t["bg"], max(0.0, min(1.0, opacity))))
-    p.drawRoundedRect(rect, m["osd_radius"] * s, m["osd_radius"] * s)
+    if t.get("glass", False):
+        gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft())
+        gradient.setColorAt(0.0, hex_to_qcolor(t["glass_top"], panel_alpha))
+        gradient.setColorAt(0.5, hex_to_qcolor(t["panel"], panel_alpha))
+        gradient.setColorAt(1.0, hex_to_qcolor(t["glass_bottom"], panel_alpha))
+        p.setBrush(gradient)
+        p.drawRoundedRect(rect, radius, radius)
+
+        border_alpha = min(1.0, panel_alpha + 0.18)
+        p.setPen(QPen(hex_to_qcolor(t["border"], border_alpha), max(1.0, s)))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(rect.adjusted(0.5 * s, 0.5 * s, -0.5 * s, -0.5 * s), radius, radius)
+
+        p.setPen(QPen(hex_to_qcolor(t["glass_highlight"], panel_alpha * 0.55), max(1.0, s)))
+        p.drawLine(
+            QPointF(rect.x() + radius, rect.y() + s),
+            QPointF(rect.right() - radius, rect.y() + s),
+        )
+    else:
+        p.setBrush(hex_to_qcolor(t["bg"], panel_alpha))
+        p.drawRoundedRect(rect, radius, radius)
 
     x = rect.x() + pad
     y = rect.y() + pad
