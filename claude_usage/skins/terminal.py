@@ -139,7 +139,7 @@ def _paint_compact_uplink(
     header = theme.get("compact_title", "UPLINK STATUS")
     draw_text(p, x, y + QFontMetrics(title_f).ascent(), header,
               hex_to_qcolor(theme["accent"]), title_f, letter_spacing_px=1.2 * s)
-    header_y = y + QFontMetrics(title_f).height() + 4 * s
+    header_y = y + QFontMetrics(title_f).height() + 8 * s
     p.setPen(QPen(hex_to_qcolor(theme["border"], 0.9), max(0.5, 0.7 * s)))
     p.drawLine(QPointF(x, header_y), QPointF(x + width, header_y))
 
@@ -208,9 +208,22 @@ def paint_gauge(
     p.setPen(Qt.NoPen)
     p.setBrush(gradient)
     p.drawRoundedRect(rect, radius, radius)
-    p.setPen(QPen(hex_to_qcolor(t["accent2"], min(1.0, panel_alpha + 0.2)), max(0.8, s)))
+    border_alpha = min(1.0, panel_alpha + 0.18)
+    p.setPen(QPen(hex_to_qcolor(t["border"], border_alpha), max(1.0, s)))
     p.setBrush(Qt.NoBrush)
     p.drawRoundedRect(rect.adjusted(0.5 * s, 0.5 * s, -0.5 * s, -0.5 * s), radius, radius)
+    p.setPen(QPen(hex_to_qcolor(t["glass_highlight"], panel_alpha * 0.55), max(1.0, s)))
+    p.drawLine(
+        QPointF(rect.x() + radius, rect.y() + s),
+        QPointF(rect.right() - radius, rect.y() + s),
+    )
+    if t.get("futuristic", False):
+        corner = 12 * s
+        p.setPen(QPen(hex_to_qcolor(t["accent2"], panel_alpha * 0.7), max(1.0, s)))
+        p.drawLine(rect.left() + s, rect.top() + corner, rect.left() + s, rect.top() + s)
+        p.drawLine(rect.left() + s, rect.top() + s, rect.left() + corner, rect.top() + s)
+        p.drawLine(rect.right() - corner, rect.bottom() - s, rect.right() - s, rect.bottom() - s)
+        p.drawLine(rect.right() - s, rect.bottom() - corner, rect.right() - s, rect.bottom() - s)
 
     family = t.get("font_family", FONTS["family"])
     pad = 12 * s
@@ -234,7 +247,7 @@ def paint_gauge(
     pct_f = mono_font(17 * s, bold=True, family=family)
     sub_f = mono_font(7.5 * s, family=family)
     for row_index, pair in enumerate(rows):
-        cy = 58 * s + row_index * row_height
+        cy = 64 * s + row_index * row_height
         for col, (label, pct, reset) in enumerate(pair):
             cx = rect.width() * (0.25 + col * 0.5)
             p.setPen(Qt.NoPen)
