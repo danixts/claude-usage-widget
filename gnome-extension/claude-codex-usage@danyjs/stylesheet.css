@@ -1,0 +1,46 @@
+.usage-panel-icon {
+    margin-right: 5px;
+}
+
+.usage-panel-bar-background {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    height: 10px;
+    width: 50px;
+}
+
+.usage-panel-bar-fill {
+    background-color: #ffffff;
+    border-radius: 4px;
+    height: 10px;
+}
+
+.usage-menu-section {
+    min-width: 220px;
+    padding: 4px 0;
+    spacing: 6px;
+}
+
+.usage-menu-title {
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.usage-menu-value {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.usage-menu-bar-background {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    height: 8px;
+    width: 210px;
+}
+
+.usage-menu-bar-fill {
+    background-color: #ef8354;
+    border-radius: 4px;
+    height: 8px;
+}

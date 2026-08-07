@@ -1,0 +1,7 @@
+{
+  "name": "Claude and Codex Usage",
+  "description": "Show Claude Code and Codex CLI usage in the GNOME top panel.",
+  "uuid": "claude-codex-usage@danyjs",
+  "version": 1,
+  "shell-version": ["46"]
+}
