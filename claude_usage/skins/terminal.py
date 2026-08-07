@@ -122,6 +122,67 @@ def _draw_uplink_bar(
         p.drawLine(QPointF(divider_x, y + scale), QPointF(divider_x, y + height - scale))
 
 
+def _paint_compact_uplink(
+    p: QPainter, rect: QRectF, data, scale: float, theme: dict,
+) -> None:
+    """Paint a compact HUD: labels and values sit directly above full-width bars."""
+    s = scale
+    pad = 12 * s
+    x = rect.x() + pad
+    y = rect.y() + pad
+    width = rect.width() - 2 * pad
+    family = theme.get("font_family", FONTS["family"])
+    title_f = mono_font(10 * s, bold=True, family=family)
+    label_f = mono_font(8.5 * s, bold=True, family=family)
+    value_f = mono_font(9.5 * s, bold=True, family=family)
+
+    header = theme.get("compact_title", "UPLINK STATUS")
+    p.setPen(Qt.NoPen)
+    p.setBrush(hex_to_qcolor(theme["bg"], 0.62))
+    p.drawRoundedRect(QRectF(x - 4 * s, y - 3 * s, width + 8 * s, 20 * s), 4 * s, 4 * s)
+    draw_text(p, x, y + QFontMetrics(title_f).ascent(), header,
+              hex_to_qcolor(theme["accent"]), title_f, letter_spacing_px=1.2 * s)
+    header_y = y + QFontMetrics(title_f).height() + 4 * s
+    p.setPen(QPen(hex_to_qcolor(theme["border"], 0.9), max(0.5, 0.7 * s)))
+    p.drawLine(QPointF(x, header_y), QPointF(x + width, header_y))
+
+    rows = [
+        ("SESSION", data.session_pct, f"{data.session_reset_min}m · {int(data.session_pct * 100)}%"),
+        ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m · {int(data.weekly_pct * 100)}%"),
+    ]
+    if getattr(data, "scoped_pct", None) is not None and getattr(data, "scoped_label", ""):
+        rows.append((
+            data.scoped_label.upper(), data.scoped_pct,
+            f"{data.scoped_reset_hrs}h {data.scoped_reset_min}m · {int(data.scoped_pct * 100)}%",
+        ))
+    if getattr(data, "codex_available", False):
+        rows.extend([
+            ("CODEX 5H", data.codex_session_pct,
+             f"{data.codex_session_reset_min}m · {int(data.codex_session_pct * 100)}%"),
+            ("CODEX 7D", data.codex_weekly_pct,
+             f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m · {int(data.codex_weekly_pct * 100)}%"),
+        ])
+
+    row_height = 24 * s
+    for index, (label, pct, value) in enumerate(rows):
+        top = header_y + 6 * s + index * row_height
+        p.setPen(Qt.NoPen)
+        p.setBrush(hex_to_qcolor(theme["bg"], 0.58))
+        p.drawRoundedRect(
+            QRectF(x - 4 * s, top - 2 * s, width + 8 * s, 22 * s),
+            4 * s,
+            4 * s,
+        )
+        baseline = top + QFontMetrics(label_f).ascent()
+        draw_text(p, x, baseline, label, hex_to_qcolor(theme["text_secondary"]), label_f,
+                  letter_spacing_px=0.8 * s)
+        value_width = QFontMetrics(value_f).horizontalAdvance(value)
+        draw_text(p, x + width - value_width, baseline, value,
+                  hex_to_qcolor(theme["text_primary"]), value_f)
+        _draw_uplink_bar(p, x, top + QFontMetrics(label_f).height() + 2 * s,
+                         width, pct, theme, s)
+
+
 def paint_osd(
     p: QPainter, rect: QRectF, data, scale: float = 1.0, opacity: float = 1.0,
 ) -> None:
@@ -164,6 +225,10 @@ def paint_osd(
     else:
         p.setBrush(hex_to_qcolor(t["bg"], panel_alpha))
         p.drawRoundedRect(rect, radius, radius)
+
+    if t.get("compact_hud", False):
+        _paint_compact_uplink(p, rect, data, s, t)
+        return
 
     x = rect.x() + pad
     y = rect.y() + pad

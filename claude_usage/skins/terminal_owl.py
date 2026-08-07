@@ -10,7 +10,11 @@ WANTS_TICKER = terminal.WANTS_TICKER
 SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
 METRICS = {
     **terminal.METRICS,
-    "osd_width": 400,
+    "osd_width": 360,
+    "osd_height": 116,
+    "osd_height_scoped": 140,
+    "codex_rows_height": 48,
+    "ticker_height": 28,
 }
 FONTS = terminal.FONTS
 
@@ -22,6 +26,9 @@ THEME = {
     "panel": "#011b30",
     "glass": True,
     "futuristic": True,
+    "compact_hud": True,
+    "compact_title": "[ UPLINK STATUS ]",
+    "font_family": "Noto Sans Mono",
     "glass_top": "#0b2d4a",
     "glass_bottom": "#010f1e",
     "glass_highlight": "#7fdbca",

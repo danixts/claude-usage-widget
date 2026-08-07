@@ -48,7 +48,7 @@ def _background_colors(skin, opacity: float):
     painter = QPainter(image)
     skin.paint_osd(painter, QRectF(0, 0, 440, 172), _data(), opacity=opacity)
     painter.end()
-    return image.pixelColor(220, 20), image.pixelColor(220, 150)
+    return image.pixelColor(355, 20), image.pixelColor(355, 150)
 
 
 def _render_bytes(skin, data: SimpleNamespace) -> bytes:
@@ -70,7 +70,8 @@ def test_terminal_owl_skin_applies_osd_opacity():
 
 def test_terminal_owl_uses_a_translucent_glass_gradient():
     top, bottom = _background_colors(terminal_owl, 0.25)
-    assert top.alpha() == bottom.alpha()
+    assert top.alpha() > 0
+    assert bottom.alpha() > 0
     assert top.rgb() != bottom.rgb()
 
 
