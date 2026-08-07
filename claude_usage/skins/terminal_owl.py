@@ -15,6 +15,10 @@ METRICS = {
     "osd_height_scoped": 176,
     "codex_rows_height": 64,
     "ticker_height": 28,
+    "gauge_width": 270,
+    "gauge_height": 146,
+    "gauge_codex_height": 104,
+    "gauge_scoped_height": 28,
 }
 FONTS = terminal.FONTS
 
@@ -67,6 +71,11 @@ def _terminal_palette():
 def paint_osd(*args, **kwargs):
     with _terminal_palette():
         return terminal.paint_osd(*args, **kwargs)
+
+
+def paint_gauge(*args, **kwargs):
+    with _terminal_palette():
+        return terminal.paint_gauge(*args, **kwargs)
 
 
 def measure_popup(*args, **kwargs):

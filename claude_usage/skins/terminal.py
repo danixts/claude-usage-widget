@@ -19,7 +19,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QFontMetrics, QLinearGradient, QPainter, QPen
 
 from ._paint import (
-    draw_ascii_bar, draw_block_bar, draw_heatmap_52w, draw_sparkline_bars,
+    draw_ascii_bar, draw_block_bar, draw_heatmap_52w, draw_ring, draw_sparkline_bars,
     draw_text, draw_ticker_marquee, hex_to_qcolor, mono_font,
 )
 from ._popup import (
@@ -195,6 +195,88 @@ def _paint_compact_uplink(
             data.ticker_items, data.ticker_offset,
             ticker_colors, ticker_f, sep_gap_px=10 * s,
         )
+
+
+def paint_gauge(
+    p: QPainter, rect: QRectF, data, scale: float = 1.0, opacity: float = 1.0,
+) -> None:
+    """Render Terminal Owl's compact dual-ring Uplink gauge."""
+    s = scale
+    t = THEME
+    panel_alpha = max(0.0, min(1.0, opacity))
+    radius = METRICS["osd_radius"] * s
+    gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft())
+    gradient.setColorAt(0.0, hex_to_qcolor(t.get("glass_top", t["panel"]), panel_alpha))
+    gradient.setColorAt(1.0, hex_to_qcolor(t.get("glass_bottom", t["bg"]), panel_alpha))
+    p.setPen(Qt.NoPen)
+    p.setBrush(gradient)
+    p.drawRoundedRect(rect, radius, radius)
+    p.setPen(QPen(hex_to_qcolor(t["accent2"], min(1.0, panel_alpha + 0.2)), max(0.8, s)))
+    p.setBrush(Qt.NoBrush)
+    p.drawRoundedRect(rect.adjusted(0.5 * s, 0.5 * s, -0.5 * s, -0.5 * s), radius, radius)
+
+    family = t.get("font_family", FONTS["family"])
+    pad = 12 * s
+    title_f = mono_font(9 * s, bold=True, family=family)
+    p.setPen(Qt.NoPen)
+    p.setBrush(hex_to_qcolor(t["bg"], 0.62))
+    p.drawRoundedRect(QRectF(pad - 4 * s, pad - 3 * s, rect.width() - 2 * pad + 8 * s, 18 * s), 4 * s, 4 * s)
+    draw_text(p, pad, pad + QFontMetrics(title_f).ascent(),
+              "[ CLAUDE // GAUGE ]", hex_to_qcolor(t["accent"]), title_f,
+              letter_spacing_px=1.0 * s)
+
+    rows = [
+        (("SESSION", data.session_pct, f"{data.session_reset_min}m"),
+         ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")),
+    ]
+    if getattr(data, "codex_available", False):
+        rows.append((
+            ("CODEX 5H", data.codex_session_pct, f"{data.codex_session_reset_min}m"),
+            ("CODEX 7D", data.codex_weekly_pct, f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m"),
+        ))
+    gauge_size = min((rect.width() - 4 * pad) / 2, 82 * s)
+    row_height = 104 * s
+    label_f = mono_font(8 * s, bold=True, family=family)
+    pct_f = mono_font(17 * s, bold=True, family=family)
+    sub_f = mono_font(7.5 * s, family=family)
+    for row_index, pair in enumerate(rows):
+        cy = 58 * s + row_index * row_height
+        for col, (label, pct, reset) in enumerate(pair):
+            cx = rect.width() * (0.25 + col * 0.5)
+            p.setPen(Qt.NoPen)
+            p.setBrush(hex_to_qcolor(t["bg"], 0.66))
+            p.drawEllipse(QRectF(
+                cx - gauge_size * 0.37,
+                cy - gauge_size * 0.37,
+                gauge_size * 0.74,
+                gauge_size * 0.74,
+            ))
+            draw_ring(p, cx, cy, gauge_size / 2, max(5 * s, 6), pct,
+                      hex_to_qcolor(t["bar_track"]), hex_to_qcolor(t["accent2"]),
+                      start_deg=-225.0, span_deg=270.0)
+            pct_text = f"{int(pct * 100)}%"
+            pct_width = QFontMetrics(pct_f).horizontalAdvance(pct_text)
+            draw_text(p, cx - pct_width / 2, cy + QFontMetrics(pct_f).ascent() / 2,
+                      pct_text, hex_to_qcolor(t["text_primary"]), pct_f)
+            label_width = QFontMetrics(label_f).horizontalAdvance(label)
+            p.setPen(Qt.NoPen)
+            p.setBrush(hex_to_qcolor(t["bg"], 0.58))
+            p.drawRoundedRect(
+                QRectF(cx - gauge_size / 2, cy + gauge_size / 2 + 3 * s, gauge_size, 23 * s),
+                3 * s,
+                3 * s,
+            )
+            draw_text(p, cx - label_width / 2, cy + gauge_size / 2 + 12 * s,
+                      label, hex_to_qcolor(t["text_secondary"]), label_f)
+            sub_width = QFontMetrics(sub_f).horizontalAdvance(reset)
+            draw_text(p, cx - sub_width / 2, cy + gauge_size / 2 + 23 * s,
+                      reset, hex_to_qcolor(t["text_primary"]), sub_f)
+
+    if getattr(data, "scoped_pct", None) is not None and getattr(data, "scoped_label", ""):
+        y = rect.bottom() - 16 * s
+        label = f"{data.scoped_label.upper()}  {int(data.scoped_pct * 100)}%"
+        draw_text(p, pad, y - 4 * s, label, hex_to_qcolor(t["text_secondary"]), label_f)
+        _draw_uplink_bar(p, pad, y, rect.width() - 2 * pad, data.scoped_pct, t, s)
 
 
 def paint_osd(

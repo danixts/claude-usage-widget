@@ -492,7 +492,16 @@ class UsageOverlay(QWidget):
             # all four combinations from a single place.
             m = self._skin.METRICS
             width = int(m["osd_width"] * self._scale)
-            height = int(self._skin_base_height() * self._scale)
+            if self._view_mode == VIEW_MODE_GAUGE and hasattr(self._skin, "paint_gauge"):
+                width = int(m.get("gauge_width", m["osd_width"]) * self._scale)
+                base = m.get("gauge_height", self._skin_base_height())
+                if self._codex_available:
+                    base += m.get("gauge_codex_height", 0)
+                if self._scoped_label:
+                    base += m.get("gauge_scoped_height", 0)
+                height = int(base * self._scale)
+            else:
+                height = int(self._skin_base_height() * self._scale)
             if self.isVisible():
                 tr = self.frameGeometry().topRight()
                 self.resize(width, height)
@@ -753,6 +762,9 @@ class UsageOverlay(QWidget):
             data = replace(data, show_ticker=self._ticker_enabled)
             try:
                 s = self._scale
+                if self._view_mode == VIEW_MODE_GAUGE and hasattr(self._skin, "paint_gauge"):
+                    self._skin.paint_gauge(p, QRectF(0, 0, w, h), data, s, self._opacity)
+                    return
                 # Paint into the SAME rect height the window was sized to in
                 # _apply_size — via the shared _skin_base_height() so the two
                 # can never disagree and let a scoped/Codex row spill outside
