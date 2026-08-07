@@ -61,6 +61,7 @@ THEME = {
 METRICS = {
     "osd_width":       440,
     "osd_height":      172,
+    "ticker_height":   28,
     "osd_height_scoped": 212,  # +1 Session/Weekly row footprint (2*line_h + row_gap + 2)
     "codex_rows_height": 80,   # 2 × (osd_height_scoped − osd_height) = two extra rows
     "osd_radius":      6,
@@ -118,6 +119,13 @@ def paint_osd(
             QPointF(rect.x() + radius, rect.y() + s),
             QPointF(rect.right() - radius, rect.y() + s),
         )
+        if t.get("futuristic", False):
+            corner = 12 * s
+            p.setPen(QPen(hex_to_qcolor(t["accent2"], panel_alpha * 0.7), max(1.0, s)))
+            p.drawLine(rect.left() + s, rect.top() + corner, rect.left() + s, rect.top() + s)
+            p.drawLine(rect.left() + s, rect.top() + s, rect.left() + corner, rect.top() + s)
+            p.drawLine(rect.right() - corner, rect.bottom() - s, rect.right() - s, rect.bottom() - s)
+            p.drawLine(rect.right() - s, rect.bottom() - corner, rect.right() - s, rect.bottom() - s)
     else:
         p.setBrush(hex_to_qcolor(t["bg"], panel_alpha))
         p.drawRoundedRect(rect, radius, radius)
@@ -135,7 +143,8 @@ def paint_osd(
 
     # titlebar  ┌─ CLAUDE  ⚙ N        ● LIVE 10.5k t/m
     baseline = y + fm.ascent()
-    adv = draw_text(p, x, baseline, "┌─ CLAUDE", hex_to_qcolor(t["accent"]), title_f, letter_spacing_px=1.0 * s)
+    title = t.get("title", "┌─ CLAUDE")
+    adv = draw_text(p, x, baseline, title, hex_to_qcolor(t["accent"]), title_f, letter_spacing_px=1.0 * s)
     if getattr(data, "subagent_count", 0):
         draw_text(p, x + adv + 8 * s, baseline, f"⚙ {data.subagent_count}",
                   hex_to_qcolor(t["text_secondary"]), body_f)
@@ -147,7 +156,7 @@ def paint_osd(
 
     # session row
     y_row = y + line_h + m["osd_row_gap"] * s
-    draw_text(p, x, y_row + fm.ascent(), "session",
+    draw_text(p, x, y_row + fm.ascent(), t.get("session_label", "session"),
               hex_to_qcolor(t["text_secondary"]), body_f)
     right = f"{data.session_reset_min}m · {int(data.session_pct*100)}%"
     rw = fm.horizontalAdvance(right)
@@ -161,7 +170,7 @@ def paint_osd(
 
     # weekly row
     y_row = y_bar + line_h + m["osd_row_gap"] * s
-    draw_text(p, x, y_row + fm.ascent(), "weekly",
+    draw_text(p, x, y_row + fm.ascent(), t.get("weekly_label", "weekly"),
               hex_to_qcolor(t["text_secondary"]), body_f)
     right = f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m · {int(data.weekly_pct*100)}%"
     rw = fm.horizontalAdvance(right)

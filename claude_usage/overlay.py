@@ -479,6 +479,8 @@ class UsageOverlay(QWidget):
             base = m.get("osd_height_scoped", base + SCOPED_ROW_HEIGHT)
         if self._codex_available:
             base += m.get("codex_rows_height", 2 * SCOPED_ROW_HEIGHT)
+        if not self._ticker_enabled and getattr(self._skin, "WANTS_TICKER", False):
+            base -= m.get("ticker_height", 0)
         return base
 
     def _apply_size(self) -> None:

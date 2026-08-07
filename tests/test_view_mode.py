@@ -1,3 +1,5 @@
+# ruff: noqa: I001
+
 """Tests for the OSD view-mode switch (bars ↔ gauge).
 
 Uses Qt's offscreen platform so the tests run headless on CI.
@@ -59,6 +61,18 @@ class TestViewMode(unittest.TestCase):
         self.assertEqual(ov.height(), GAUGE_HEIGHT)
         ov.set_view_mode(VIEW_MODE_BARS)
         self.assertEqual(ov.height(), bars_h)
+
+    def test_terminal_skin_reclaims_ticker_space_when_hidden(self) -> None:
+        from claude_usage.skins import terminal_owl
+
+        metrics = terminal_owl.METRICS
+        ov = UsageOverlay({"theme": "terminal-owl", "show_ticker": False})
+        self.assertEqual(
+            ov.height(),
+            metrics["osd_height"] - metrics["ticker_height"],
+        )
+        ov.set_ticker_enabled(True)
+        self.assertEqual(ov.height(), metrics["osd_height"])
 
     def test_set_view_mode_ignores_invalid(self) -> None:
         ov = UsageOverlay({})

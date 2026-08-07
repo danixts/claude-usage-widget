@@ -18,6 +18,7 @@ THEME = {
     "bg": "#011627",
     "panel": "#011b30",
     "glass": True,
+    "futuristic": True,
     "glass_top": "#0b2d4a",
     "glass_bottom": "#010f1e",
     "glass_highlight": "#7fdbca",
@@ -35,6 +36,9 @@ THEME = {
     "live_indicator": "#addb67",
     "accent": "#82aaff",
     "accent2": "#7fdbca",
+    "title": "[ CLAUDE // UPLINK ]",
+    "session_label": "SESSION",
+    "weekly_label": "WEEKLY",
     "very_dim": "#02233d",
 }
 
