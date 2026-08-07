@@ -10,7 +10,7 @@ WANTS_TICKER = terminal.WANTS_TICKER
 SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
 METRICS = {
     **terminal.METRICS,
-    "osd_width": 360,
+    "osd_width": 270,
     "osd_height": 144,
     "osd_height_scoped": 176,
     "codex_rows_height": 64,
