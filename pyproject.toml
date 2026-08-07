@@ -56,3 +56,8 @@ version = { attr = "claude_usage.__version__" }
 
 [tool.setuptools.package-data]
 claude_usage = ["py.typed", "icons/*.svg"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
