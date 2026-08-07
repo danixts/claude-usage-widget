@@ -245,14 +245,6 @@ def paint_gauge(
         cy = 64 * s + row_index * row_height
         for col, (label, pct, reset) in enumerate(pair):
             cx = rect.width() * (0.25 + col * 0.5)
-            p.setPen(Qt.NoPen)
-            p.setBrush(hex_to_qcolor(t["bg"], 0.66))
-            p.drawEllipse(QRectF(
-                cx - gauge_size * 0.37,
-                cy - gauge_size * 0.37,
-                gauge_size * 0.74,
-                gauge_size * 0.74,
-            ))
             draw_ring(p, cx, cy, gauge_size / 2, max(5 * s, 6), pct,
                       hex_to_qcolor(t["bar_track"]), hex_to_qcolor(t["accent2"]),
                       start_deg=-225.0, span_deg=270.0)
@@ -261,13 +253,6 @@ def paint_gauge(
             draw_text(p, cx - pct_width / 2, cy + QFontMetrics(pct_f).ascent() / 2,
                       pct_text, hex_to_qcolor(t["text_primary"]), pct_f)
             label_width = QFontMetrics(label_f).horizontalAdvance(label)
-            p.setPen(Qt.NoPen)
-            p.setBrush(hex_to_qcolor(t["bg"], 0.58))
-            p.drawRoundedRect(
-                QRectF(cx - gauge_size / 2, cy + gauge_size / 2 + 3 * s, gauge_size, 23 * s),
-                3 * s,
-                3 * s,
-            )
             draw_text(p, cx - label_width / 2, cy + gauge_size / 2 + 12 * s,
                       label, hex_to_qcolor(t["text_secondary"]), label_f)
             sub_width = QFontMetrics(sub_f).horizontalAdvance(reset)
