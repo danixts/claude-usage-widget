@@ -222,6 +222,10 @@ def paint_gauge(
         p.setPen(QPen(hex_to_qcolor(t["accent2"], panel_alpha * 0.7), max(1.0, s)))
         p.drawLine(rect.left() + s, rect.top() + corner, rect.left() + s, rect.top() + s)
         p.drawLine(rect.left() + s, rect.top() + s, rect.left() + corner, rect.top() + s)
+        p.drawLine(rect.right() - corner, rect.top() + s, rect.right() - s, rect.top() + s)
+        p.drawLine(rect.right() - s, rect.top() + s, rect.right() - s, rect.top() + corner)
+        p.drawLine(rect.left() + s, rect.bottom() - corner, rect.left() + s, rect.bottom() - s)
+        p.drawLine(rect.left() + s, rect.bottom() - s, rect.left() + corner, rect.bottom() - s)
         p.drawLine(rect.right() - corner, rect.bottom() - s, rect.right() - s, rect.bottom() - s)
         p.drawLine(rect.right() - s, rect.bottom() - corner, rect.right() - s, rect.bottom() - s)
 
@@ -323,6 +327,10 @@ def paint_osd(
             p.setPen(QPen(hex_to_qcolor(t["accent2"], panel_alpha * 0.7), max(1.0, s)))
             p.drawLine(rect.left() + s, rect.top() + corner, rect.left() + s, rect.top() + s)
             p.drawLine(rect.left() + s, rect.top() + s, rect.left() + corner, rect.top() + s)
+            p.drawLine(rect.right() - corner, rect.top() + s, rect.right() - s, rect.top() + s)
+            p.drawLine(rect.right() - s, rect.top() + s, rect.right() - s, rect.top() + corner)
+            p.drawLine(rect.left() + s, rect.bottom() - corner, rect.left() + s, rect.bottom() - s)
+            p.drawLine(rect.left() + s, rect.bottom() - s, rect.left() + corner, rect.bottom() - s)
             p.drawLine(rect.right() - corner, rect.bottom() - s, rect.right() - s, rect.bottom() - s)
             p.drawLine(rect.right() - s, rect.bottom() - corner, rect.right() - s, rect.bottom() - s)
     else:
