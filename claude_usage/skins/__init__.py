@@ -29,15 +29,15 @@ SKIN_MODULES = {
 }
 
 __all__ = [
+    "SKIN_MODULES",
+    "SkinData",
+    "SkinTickerItem",
     "brutalist",
     "dashboard",
+    "from_usage_stats",
     "hud",
     "receipt",
     "strip",
     "terminal",
     "terminal_owl",
-    "SKIN_MODULES",
-    "SkinData",
-    "SkinTickerItem",
-    "from_usage_stats",
 ]

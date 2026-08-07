@@ -8,7 +8,6 @@ import pytest
 
 from claude_usage.themes import THEME_KEYS, THEMES, get_theme
 
-
 _HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 EXPECTED_THEMES = {
