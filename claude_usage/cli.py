@@ -25,6 +25,37 @@ from claude_usage.config import load_config, user_config_path
 _instance_lock = None
 
 
+def _widget_pid_path() -> str:
+    """Return the per-user PID file used by external panel integrations."""
+    cache_dir = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+    return os.path.join(cache_dir, "claude-usage", "widget.pid")
+
+
+def _write_widget_pid() -> str | None:
+    """Persist this process ID so the GNOME panel can stop the overlay safely."""
+    path = _widget_pid_path()
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(str(os.getpid()))
+    except OSError:
+        return None
+    return path
+
+
+def _remove_widget_pid(path: str | None) -> None:
+    """Remove only the PID file owned by this process."""
+    if path is None:
+        return
+    try:
+        with open(path, encoding="utf-8") as handle:
+            if handle.read().strip() != str(os.getpid()):
+                return
+        os.unlink(path)
+    except OSError:
+        pass
+
+
 def _instance_lock_path() -> str:
     """Per-user path for the single-instance guard lock file.
 
@@ -39,6 +70,7 @@ def _instance_lock_path() -> str:
     base = runtime if runtime and os.path.isdir(runtime) else tempfile.gettempdir()
     try:
         import getpass
+
         user = getpass.getuser()
     except Exception:
         user = str(os.getpid())
@@ -55,18 +87,37 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--version", action="store_true", help="Print version and exit.")
     p.add_argument("--json", action="store_true", help="Emit full stats as JSON.")
     p.add_argument("--once", action="store_true", help="Collect once and print JSON.")
-    p.add_argument("--statusline", action="store_true",
-                   help="Print one compact status line for Claude Code's "
-                        "statusLine setting and exit.")
-    p.add_argument("--field", metavar="NAME", default=None,
-                   help="Print a single UsageStats field by name.")
-    p.add_argument("--export", choices=("csv", "json"), default=None,
-                   help="Export history as CSV or JSON to stdout.")
-    p.add_argument("--days", type=int, default=30,
-                   help="Look-back window for --export (default: 30).")
-    p.add_argument("--detach", "-d", action="store_true",
-                   help="Run the GUI in the background and return the shell "
-                        "prompt; logs go to ~/.cache/claude-usage/widget.log.")
+    p.add_argument(
+        "--statusline",
+        action="store_true",
+        help="Print one compact status line for Claude Code's "
+        "statusLine setting and exit.",
+    )
+    p.add_argument(
+        "--field",
+        metavar="NAME",
+        default=None,
+        help="Print a single UsageStats field by name.",
+    )
+    p.add_argument(
+        "--export",
+        choices=("csv", "json"),
+        default=None,
+        help="Export history as CSV or JSON to stdout.",
+    )
+    p.add_argument(
+        "--days",
+        type=int,
+        default=30,
+        help="Look-back window for --export (default: 30).",
+    )
+    p.add_argument(
+        "--detach",
+        "-d",
+        action="store_true",
+        help="Run the GUI in the background and return the shell "
+        "prompt; logs go to ~/.cache/claude-usage/widget.log.",
+    )
     return p
 
 
@@ -162,9 +213,12 @@ def run_cli(argv: Sequence[str]) -> int:
 
     if args.export:
         from claude_usage.exporter import export_history
+
         config = load_config(_default_config_path())
         history_path = os.path.join(config["claude_dir"], "usage-history.jsonl")
-        count = export_history(history_path, fmt=args.export, days=args.days, out=sys.stdout)
+        count = export_history(
+            history_path, fmt=args.export, days=args.days, out=sys.stdout
+        )
         print(f"# exported {count} samples", file=sys.stderr)
         return 0
 
@@ -175,6 +229,7 @@ def run_cli(argv: Sequence[str]) -> int:
         # Same privacy redaction as the localhost API — never leak raw prompt
         # text through --json / --field / --statusline output.
         from claude_usage.api_server import _redact_external
+
         data = _redact_external(data)
 
         if args.statusline:
@@ -314,7 +369,12 @@ def _launch_gui() -> None:
     config = load_config(_default_config_path())
     _controller = ClaudeUsageApp(config)  # keep a reference
     _ = _controller  # suppress unused-var warnings; QApplication holds ownership
-    sys.exit(app.exec())
+    pid_path = _write_widget_pid()
+    try:
+        exit_code = app.exec()
+    finally:
+        _remove_widget_pid(pid_path)
+    sys.exit(exit_code)
 
 
 def main() -> int:
@@ -331,8 +391,14 @@ def main() -> int:
     # (Qt, collector). run_cli would consume the flag and return -1
     # anyway, but forking earlier means a faster shell-prompt return.
     args = build_parser().parse_args(sys.argv[1:])
-    if args.detach and not (args.version or args.json or args.once or
-                            args.field or args.export or args.statusline):
+    if args.detach and not (
+        args.version
+        or args.json
+        or args.once
+        or args.field
+        or args.export
+        or args.statusline
+    ):
         _detach_into_background()
         _launch_gui()
         return 0

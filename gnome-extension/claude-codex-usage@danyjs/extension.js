@@ -10,6 +10,9 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const REFRESH_SECONDS = 60;
 const WIDGET_COMMAND = 'claude-usage';
+const WIDGET_PID_PATH = GLib.build_filenamev([
+    GLib.get_user_cache_dir(), 'claude-usage', 'widget.pid',
+]);
 
 function percent(value) {
     return Math.round(Math.max(0, Math.min(1, Number(value) || 0)) * 100);
@@ -19,6 +22,23 @@ function widgetCommand() {
     return GLib.find_program_in_path(WIDGET_COMMAND) ?? GLib.build_filenamev([
         GLib.get_home_dir(), '.local', 'bin', WIDGET_COMMAND,
     ]);
+}
+
+function widgetPid() {
+    try {
+        const [ok, contents] = GLib.file_get_contents(WIDGET_PID_PATH);
+        if (!ok)
+            return 0;
+        const pid = Number(new TextDecoder().decode(contents).trim());
+        return Number.isInteger(pid) && pid > 1 ? pid : 0;
+    } catch (_error) {
+        return 0;
+    }
+}
+
+function widgetIsRunning() {
+    const pid = widgetPid();
+    return pid > 0 && GLib.file_test(`/proc/${pid}`, GLib.FileTest.EXISTS);
 }
 
 const UsageIndicator = class extends PanelMenu.Button {
@@ -61,13 +81,17 @@ const UsageIndicator = class extends PanelMenu.Button {
         this._codexWeekly = this._addUsageRow('Codex weekly');
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        const openWidget = new PopupMenu.PopupMenuItem('Open themed widget');
-        openWidget.connect('activate', () => this._openWidget());
-        this.menu.addMenuItem(openWidget);
+        this._widgetAction = new PopupMenu.PopupMenuItem('Open themed widget');
+        this._widgetAction.connect('activate', () => this._toggleWidget());
+        this.menu.addMenuItem(this._widgetAction);
 
         const refresh = new PopupMenu.PopupMenuItem('Refresh');
         refresh.connect('activate', () => this._refresh());
         this.menu.addMenuItem(refresh);
+
+        this._widgetAction.label.set_text(
+            widgetIsRunning() ? 'Close themed widget' : 'Open themed widget'
+        );
 
         this._updated = new PopupMenu.PopupMenuItem('Loading usage data…');
         this._updated.setSensitive(false);
@@ -148,8 +172,14 @@ const UsageIndicator = class extends PanelMenu.Button {
         row.fill.set_width(Math.max(2, Math.round(usage * 2.1)));
     }
 
-    _openWidget() {
+    _toggleWidget() {
+        if (widgetIsRunning()) {
+            Gio.Subprocess.new(['/bin/kill', '-TERM', String(widgetPid())], Gio.SubprocessFlags.NONE);
+            this._widgetAction.label.set_text('Open themed widget');
+            return;
+        }
         Gio.Subprocess.new([widgetCommand(), '--detach'], Gio.SubprocessFlags.NONE);
+        this._widgetAction.label.set_text('Close themed widget');
     }
 
     destroy() {
