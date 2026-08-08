@@ -141,22 +141,31 @@ def _paint_compact_uplink(
               hex_to_qcolor(theme["accent"]), title_f, letter_spacing_px=1.2 * s)
     header_y = y + QFontMetrics(title_f).height() + 8 * s
 
-    rows = [
-        ("SESSION", data.session_pct, f"{data.session_reset_min}m · {int(data.session_pct * 100)}%"),
-        ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m · {int(data.weekly_pct * 100)}%"),
-    ]
+    rows = []
+    if not theme.get("weekly_only", False):
+        rows.append((
+            "SESSION", data.session_pct,
+            f"{data.session_reset_min}m · {int(data.session_pct * 100)}%",
+        ))
+    rows.append((
+        "WEEKLY", data.weekly_pct,
+        f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m · {int(data.weekly_pct * 100)}%",
+    ))
     if getattr(data, "scoped_pct", None) is not None and getattr(data, "scoped_label", ""):
         rows.append((
             data.scoped_label.upper(), data.scoped_pct,
             f"{data.scoped_reset_hrs}h {data.scoped_reset_min}m · {int(data.scoped_pct * 100)}%",
         ))
     if getattr(data, "codex_available", False):
-        rows.extend([
-            ("CODEX 5H", data.codex_session_pct,
-             f"{data.codex_session_reset_min}m · {int(data.codex_session_pct * 100)}%"),
-            ("CODEX 7D", data.codex_weekly_pct,
-             f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m · {int(data.codex_weekly_pct * 100)}%"),
-        ])
+        if not theme.get("weekly_only", False):
+            rows.append((
+                "CODEX 5H", data.codex_session_pct,
+                f"{data.codex_session_reset_min}m · {int(data.codex_session_pct * 100)}%",
+            ))
+        rows.append((
+            "CODEX 7D", data.codex_weekly_pct,
+            f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m · {int(data.codex_weekly_pct * 100)}%",
+        ))
 
     row_height = 32 * s
     for index, (label, pct, value) in enumerate(rows):
@@ -227,15 +236,24 @@ def paint_gauge(
               "[ CLAUDE // GAUGE ]", hex_to_qcolor(t["accent"]), title_f,
               letter_spacing_px=1.0 * s)
 
-    rows = [
-        (("SESSION", data.session_pct, f"{data.session_reset_min}m"),
-         ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")),
-    ]
-    if getattr(data, "codex_available", False):
-        rows.append((
-            ("CODEX 5H", data.codex_session_pct, f"{data.codex_session_reset_min}m"),
-            ("CODEX 7D", data.codex_weekly_pct, f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m"),
-        ))
+    if t.get("weekly_only", False):
+        pair = [("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")]
+        if getattr(data, "codex_available", False):
+            pair.append((
+                "CODEX 7D", data.codex_weekly_pct,
+                f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m",
+            ))
+        rows = [tuple(pair)]
+    else:
+        rows = [
+            (("SESSION", data.session_pct, f"{data.session_reset_min}m"),
+             ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")),
+        ]
+        if getattr(data, "codex_available", False):
+            rows.append((
+                ("CODEX 5H", data.codex_session_pct, f"{data.codex_session_reset_min}m"),
+                ("CODEX 7D", data.codex_weekly_pct, f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m"),
+            ))
     gauge_size = min((rect.width() - 4 * pad) / 2, 82 * s)
     row_height = 104 * s
     label_f = mono_font(8 * s, bold=True, family=family)
@@ -244,7 +262,7 @@ def paint_gauge(
     for row_index, pair in enumerate(rows):
         cy = 64 * s + row_index * row_height
         for col, (label, pct, reset) in enumerate(pair):
-            cx = rect.width() * (0.25 + col * 0.5)
+            cx = rect.center().x() if len(pair) == 1 else rect.width() * (0.25 + col * 0.5)
             draw_ring(p, cx, cy, gauge_size / 2, max(5 * s, 6), pct,
                       hex_to_qcolor(t["bar_track"]), hex_to_qcolor(t["accent2"]),
                       start_deg=-225.0, span_deg=270.0)

@@ -81,3 +81,30 @@ def test_terminal_skin_hides_bottom_ticker_when_disabled():
     hidden_data.show_ticker = False
     hidden = _render_bytes(terminal, hidden_data)
     assert shown != hidden
+
+
+def test_terminal_owl_only_draws_weekly_limits(monkeypatch):
+    data = _data()
+    data.codex_available = True
+    data.codex_session_pct = 0.4
+    data.codex_session_reset_min = 120
+    data.codex_weekly_pct = 0.6
+    data.codex_weekly_reset_hrs = 96
+    data.codex_weekly_reset_min = 15
+    drawn_text = []
+
+    def capture_text(_painter, _x, _y, text, *_args, **_kwargs):
+        drawn_text.append(text)
+        return 0.0
+
+    monkeypatch.setattr(terminal, "draw_text", capture_text)
+    image = QImage(270, 180, QImage.Format_ARGB32_Premultiplied)
+    painter = QPainter(image)
+    terminal_owl.paint_osd(painter, QRectF(0, 0, 270, 144), data)
+    terminal_owl.paint_gauge(painter, QRectF(0, 0, 270, 146), data)
+    painter.end()
+
+    assert "WEEKLY" in drawn_text
+    assert "CODEX 7D" in drawn_text
+    assert "SESSION" not in drawn_text
+    assert "CODEX 5H" not in drawn_text

@@ -11,13 +11,13 @@ SUPPORTS_OPACITY = terminal.SUPPORTS_OPACITY
 METRICS = {
     **terminal.METRICS,
     "osd_width": 270,
-    "osd_height": 144,
-    "osd_height_scoped": 176,
-    "codex_rows_height": 64,
+    "osd_height": 112,
+    "osd_height_scoped": 144,
+    "codex_rows_height": 32,
     "ticker_height": 28,
     "gauge_width": 270,
     "gauge_height": 146,
-    "gauge_codex_height": 104,
+    "gauge_codex_height": 0,
     "gauge_scoped_height": 28,
 }
 FONTS = terminal.FONTS
@@ -31,6 +31,7 @@ THEME = {
     "glass": True,
     "futuristic": True,
     "compact_hud": True,
+    "weekly_only": True,
     "compact_title": "[ CLAUDE // UPLINK ]",
     "font_family": "Noto Sans Mono",
     "glass_top": "#0b2d4a",
