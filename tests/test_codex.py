@@ -40,6 +40,29 @@ def test_parse_single_window_and_clamping():
     assert parsed["weekly_pct"] == 0.0
 
 
+def test_parse_weekly_window_when_api_returns_it_as_primary():
+    parsed = parse_rate_limits(_payload(primary={
+        "usedPercent": 77,
+        "resetsAt": FUTURE,
+        "windowDurationMins": 10080,
+    }))
+    assert parsed == {
+        "session_pct": 0.0,
+        "session_reset": 0,
+        "weekly_pct": 0.77,
+        "weekly_reset": FUTURE,
+    }
+
+
+def test_parse_reversed_windows_by_duration():
+    parsed = parse_rate_limits(_payload(
+        primary={"usedPercent": 77, "resetsAt": FUTURE, "windowDurationMins": 10080},
+        secondary={"usedPercent": 22, "resetsAt": FUTURE, "windowDurationMins": 300},
+    ))
+    assert parsed["session_pct"] == 0.22
+    assert parsed["weekly_pct"] == 0.77
+
+
 def test_parse_millisecond_resets_normalised():
     parsed = parse_rate_limits(_payload(primary={"usedPercent": 10, "resetsAt": FUTURE * 1000}))
     assert parsed is not None

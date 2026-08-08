@@ -145,7 +145,7 @@ def parse_rate_limits(payload: Any) -> dict[str, Any] | None:
     if not isinstance(limits, dict):
         return None
 
-    def window(block: Any) -> tuple[float, int] | None:
+    def window(block: Any) -> tuple[float, int, int | None] | None:
         if not isinstance(block, dict) or block.get("usedPercent") is None:
             return None
         try:
@@ -159,17 +159,44 @@ def parse_rate_limits(payload: Any) -> dict[str, Any] | None:
             reset_ts = 0
         if reset_ts > 10**12:  # milliseconds — normalise to seconds
             reset_ts //= 1000
-        return pct, reset_ts
+        duration = block.get("windowDurationMins")
+        try:
+            duration_min = int(duration) if duration is not None else None
+        except (TypeError, ValueError):
+            duration_min = None
+        return pct, reset_ts, duration_min
 
     primary = window(limits.get("primary"))
     secondary = window(limits.get("secondary"))
     if primary is None and secondary is None:
         return None
+    session = None
+    weekly = None
+    unclassified = []
+    for name, parsed_window in (("primary", primary), ("secondary", secondary)):
+        if parsed_window is None:
+            continue
+        duration_min = parsed_window[2]
+        if duration_min is not None and duration_min >= 24 * 60 and weekly is None:
+            weekly = parsed_window
+        elif duration_min is not None and duration_min < 24 * 60 and session is None:
+            session = parsed_window
+        else:
+            unclassified.append((name, parsed_window))
+    for name, parsed_window in unclassified:
+        if name == "primary" and session is None:
+            session = parsed_window
+        elif name == "secondary" and weekly is None:
+            weekly = parsed_window
+        elif session is None:
+            session = parsed_window
+        elif weekly is None:
+            weekly = parsed_window
     return {
-        "session_pct": primary[0] if primary else 0.0,
-        "session_reset": primary[1] if primary else 0,
-        "weekly_pct": secondary[0] if secondary else 0.0,
-        "weekly_reset": secondary[1] if secondary else 0,
+        "session_pct": session[0] if session else 0.0,
+        "session_reset": session[1] if session else 0,
+        "weekly_pct": weekly[0] if weekly else 0.0,
+        "weekly_reset": weekly[1] if weekly else 0,
     }
 
 
