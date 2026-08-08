@@ -83,8 +83,9 @@ def test_terminal_skin_hides_bottom_ticker_when_disabled():
     assert shown != hidden
 
 
-def test_terminal_owl_only_draws_weekly_limits(monkeypatch):
+def test_terminal_owl_keeps_claude_session_and_hides_codex_hourly_limit(monkeypatch):
     data = _data()
+    data.session_pct = 0.82
     data.codex_available = True
     data.codex_session_pct = 0.4
     data.codex_session_reset_min = 120
@@ -106,5 +107,6 @@ def test_terminal_owl_only_draws_weekly_limits(monkeypatch):
 
     assert "WEEKLY" in drawn_text
     assert "CODEX 7D" in drawn_text
-    assert "SESSION" not in drawn_text
+    assert "SESSION" in drawn_text
+    assert "82%" in drawn_text
     assert "CODEX 5H" not in drawn_text

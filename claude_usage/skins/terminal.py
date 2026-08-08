@@ -142,11 +142,10 @@ def _paint_compact_uplink(
     header_y = y + QFontMetrics(title_f).height() + 8 * s
 
     rows = []
-    if not theme.get("weekly_only", False):
-        rows.append((
-            "SESSION", data.session_pct,
-            f"{data.session_reset_min}m · {int(data.session_pct * 100)}%",
-        ))
+    rows.append((
+        "SESSION", data.session_pct,
+        f"{data.session_reset_min}m · {int(data.session_pct * 100)}%",
+    ))
     rows.append((
         "WEEKLY", data.weekly_pct,
         f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m · {int(data.weekly_pct * 100)}%",
@@ -157,7 +156,7 @@ def _paint_compact_uplink(
             f"{data.scoped_reset_hrs}h {data.scoped_reset_min}m · {int(data.scoped_pct * 100)}%",
         ))
     if getattr(data, "codex_available", False):
-        if not theme.get("weekly_only", False):
+        if not theme.get("codex_weekly_only", False):
             rows.append((
                 "CODEX 5H", data.codex_session_pct,
                 f"{data.codex_session_reset_min}m · {int(data.codex_session_pct * 100)}%",
@@ -236,20 +235,17 @@ def paint_gauge(
               "[ CLAUDE // GAUGE ]", hex_to_qcolor(t["accent"]), title_f,
               letter_spacing_px=1.0 * s)
 
-    if t.get("weekly_only", False):
-        pair = [("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")]
-        if getattr(data, "codex_available", False):
-            pair.append((
+    rows = [
+        (("SESSION", data.session_pct, f"{data.session_reset_min}m"),
+         ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")),
+    ]
+    if getattr(data, "codex_available", False):
+        if t.get("codex_weekly_only", False):
+            rows.append(((
                 "CODEX 7D", data.codex_weekly_pct,
                 f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m",
-            ))
-        rows = [tuple(pair)]
-    else:
-        rows = [
-            (("SESSION", data.session_pct, f"{data.session_reset_min}m"),
-             ("WEEKLY", data.weekly_pct, f"{data.weekly_reset_hrs}h {data.weekly_reset_min}m")),
-        ]
-        if getattr(data, "codex_available", False):
+            ),))
+        else:
             rows.append((
                 ("CODEX 5H", data.codex_session_pct, f"{data.codex_session_reset_min}m"),
                 ("CODEX 7D", data.codex_weekly_pct, f"{data.codex_weekly_reset_hrs}h {data.codex_weekly_reset_min}m"),
