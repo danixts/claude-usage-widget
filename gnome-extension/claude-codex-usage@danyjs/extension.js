@@ -197,6 +197,14 @@ export default class ClaudeCodexUsageExtension extends Extension {
     enable() {
         this._indicator = new UsageIndicator(this.path);
         Main.panel.addToStatusArea(this.uuid, this._indicator);
+
+        const claudeIndicator = Main.panel.statusArea['claude-code-usage@haletran.com'];
+        if (claudeIndicator) {
+            const children = Main.panel._rightBox.get_children();
+            const claudeIndex = children.indexOf(claudeIndicator.container);
+            if (claudeIndex >= 0)
+                Main.panel._rightBox.set_child_at_index(this._indicator.container, claudeIndex + 1);
+        }
     }
 
     disable() {
