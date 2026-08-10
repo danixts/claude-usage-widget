@@ -3,8 +3,12 @@ set -euo pipefail
 
 uuid='claude-codex-usage@danyjs'
 target="$HOME/.local/share/gnome-shell/extensions/$uuid"
-mkdir -p "$target"
+autostart_target="$HOME/.config/autostart/claude-usage-widget.desktop"
+mkdir -p "$target" "$(dirname "$autostart_target")"
+widget_command="$(command -v claude-usage)"
 cp gnome-extension/$uuid/{extension.js,metadata.json,stylesheet.css,codex-icon.png} "$target/"
+
+sed "s|^Exec=.*|Exec=$widget_command --detach|" autostart/claude-usage-widget.desktop > "$autostart_target"
 
 python3 - "$uuid" <<'PYTHON'
 import ast
@@ -25,4 +29,4 @@ subprocess.run(
 )
 PYTHON
 
-printf 'Enabled %s. Log out and back in to load a newly installed extension.\n' "$uuid"
+printf 'Enabled %s and installed the widget login autostart entry. Log out and back in to load a newly installed extension.\n' "$uuid"

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Claude & Codex Usage Widget
+Comment=Show Claude and Codex usage when you sign in
+Exec=claude-usage --detach
+Terminal=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
