@@ -1,5 +1,6 @@
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
@@ -41,7 +42,8 @@ function widgetIsRunning() {
     return pid > 0 && GLib.file_test(`/proc/${pid}`, GLib.FileTest.EXISTS);
 }
 
-const UsageIndicator = class extends PanelMenu.Button {
+const UsageIndicator = GObject.registerClass(
+class UsageIndicator extends PanelMenu.Button {
     _init(extensionPath) {
         super._init(0.0, 'Claude and Codex Usage');
         this._refreshing = false;
@@ -189,7 +191,7 @@ const UsageIndicator = class extends PanelMenu.Button {
         }
         super.destroy();
     }
-};
+});
 
 export default class ClaudeCodexUsageExtension extends Extension {
     enable() {
